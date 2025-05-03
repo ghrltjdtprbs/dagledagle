@@ -5,13 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../user/entity/user.entity';
 import { RefreshTokenEntity } from './entity/refresh-token.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from '../../common/strategy/jwt.strategy';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, RefreshTokenEntity]), // ✅ 둘 다 등록
-    JwtModule.register({}), // 나중에 config 기반으로 옮겨도 됨
+    JwtModule.register({}),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}
