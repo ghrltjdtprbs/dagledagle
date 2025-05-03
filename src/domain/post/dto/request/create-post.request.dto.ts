@@ -6,7 +6,10 @@ export class CreatePostRequestDto {
   @IsString()
   title: string;
 
-  @ApiProperty({ example: 'NestJS는 정말 좋습니다!', description: '게시글 본문' })
+  @ApiProperty({
+    example: 'NestJS는 정말 좋습니다!',
+    description: '게시글 본문',
+  })
   @IsString()
   content: string;
 

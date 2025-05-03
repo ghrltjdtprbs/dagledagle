@@ -46,15 +46,14 @@ export class PostCommandController {
   }
 
   @Delete(':id')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
-@ApiOperation({
-  summary: '게시글 삭제',
-  description: '자신이 작성한 게시글을 소프트 삭제합니다.',
-})
-async deletePost(@Req() req, @Param('id') postId: string): Promise<string> {
-  await this.postCommandService.softDelete(+postId, req.user.id);
-  return '게시글 삭제 완료';
-}
-
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '게시글 삭제',
+    description: '자신이 작성한 게시글을 소프트 삭제합니다.',
+  })
+  async deletePost(@Req() req, @Param('id') postId: string): Promise<string> {
+    await this.postCommandService.softDelete(+postId, req.user.id);
+    return '게시글 삭제 완료';
+  }
 }
