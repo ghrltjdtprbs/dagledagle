@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { UserModule } from './domain/user/user.module';
 import { PostModule } from './domain/post/post.module';
 import { CommentModule } from './domain/comment/comment.module';
+import { LikeModule } from './domain/like/like.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { CommentModule } from './domain/comment/comment.module';
     AuthModule,
     PostModule,
     CommentModule,
+    LikeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
