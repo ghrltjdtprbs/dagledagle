@@ -1,10 +1,19 @@
 // src/domain/user/command/user.command.controller.ts
 
-import { Controller, Post, Body, Delete, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Delete,
+  Patch,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { UserCommandService } from './user.command.service';
 import { SignupRequestDto } from '../dto/request/signup.request.dto';
 import { SignupResponseDto } from '../dto/response/signup.response.dto';
+import { UpdateMyInfoRequestDto } from '../dto/request/update-my-info.request.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('Users')
@@ -37,5 +46,20 @@ export class UserCommandController {
   async deleteUser(@Req() req): Promise<string> {
     await this.userCommandService.softDelete(req.user.id);
     return '회원 탈퇴 완료';
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '내 정보 수정',
+    description: '이메일을 제외한 이름, 닉네임만 수정할 수 있습니다.',
+  })
+  async updateUser(
+    @Req() req,
+    @Body() dto: UpdateMyInfoRequestDto,
+  ): Promise<string> {
+    await this.userCommandService.updateUser(req.user.id, dto);
+    return '회원 정보 수정 완료';
   }
 }

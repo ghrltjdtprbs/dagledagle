@@ -48,4 +48,21 @@ export class UserCommandService {
     user.delete(new Date());
     await this.userRepository.save(user);
   }
+
+  async updateUser(
+    userId: number,
+    payload: { name?: string; nickname?: string },
+  ): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      withDeleted: false,
+    });
+  
+    if (!user) throw new UserNotFoundException();
+  
+    if (payload.name) user.name = payload.name;
+    if (payload.nickname) user.nickname = payload.nickname;
+  
+    await this.userRepository.save(user);
+  }
 }
