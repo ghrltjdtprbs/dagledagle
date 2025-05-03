@@ -24,7 +24,8 @@ export class CommentCommandController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: '댓글 작성',
-    description: '게시글에 댓글 또는 대댓글을 작성합니다.',
+    description:
+      '게시글에 댓글 또는 대댓글을 작성합니다. 대댓글은 1단까지만 가능합니다.',
   })
   async createComment(
     @Req() req,

@@ -1,7 +1,8 @@
 // src/domain/user/user.entity.ts
 
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { SoftDeletableBaseEntity } from '../../../common/entity/soft-delete-base.entity';
+import { PostEntity } from '@/domain/post/entity/post.entity';
 
 @Entity('users')
 export class UserEntity extends SoftDeletableBaseEntity {
@@ -19,4 +20,7 @@ export class UserEntity extends SoftDeletableBaseEntity {
 
   @Column()
   password: string; // 비밀번호
+
+  @OneToMany(() => PostEntity, (post) => post.author)
+  posts: PostEntity[];
 }

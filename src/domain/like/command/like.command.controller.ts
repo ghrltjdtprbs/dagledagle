@@ -16,7 +16,10 @@ export class LikeCommandController {
     summary: '좋아요 토글',
     description: '좋아요가 없으면 추가, 있으면 취소합니다.',
   })
-  async toggleLike(@Req() req, @Param('postId') postId: string): Promise<string> {
+  async toggleLike(
+    @Req() req,
+    @Param('postId') postId: string,
+  ): Promise<string> {
     const liked = await this.likeService.toggle(+postId, req.user.id);
     return liked ? '좋아요 추가' : '좋아요 취소';
   }

@@ -30,7 +30,7 @@ export class PostEntity extends SoftDeletableBaseEntity {
   @Column({ default: 0 })
   commentCount: number; // 댓글 수
 
-  @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity, (user) => user.posts, { onDelete: 'CASCADE' })
   author: UserEntity; // 작성자
 
   @OneToMany(() => PostAttachmentEntity, (file) => file.post, {
