@@ -8,6 +8,7 @@ import { PostAttachmentEntity } from '../entity/post-attachment.entity';
 import { CreatePostRequestDto } from '../../post/dto/request/create-post.request.dto';
 import { UpdatePostRequestDto } from '../../post/dto/request/update-post.request.dto';
 import { ForbiddenAccessException } from '../exception/forbidden-access.exception';
+import { PostNotFoundException } from '../exception/post-not-found.exception';
 
 @Injectable()
 export class PostCommandService {
@@ -49,13 +50,13 @@ export class PostCommandService {
       relations: ['author', 'attachments'],
       withDeleted: false,
     });
-  
+
     if (!post) throw new Error('게시글이 존재하지 않습니다.');
     if (post.author.id !== userId) throw new ForbiddenAccessException();
-  
+
     if (dto.title) post.title = dto.title;
     if (dto.content) post.content = dto.content;
-  
+
     if (dto.attachments) {
       // 기존 첨부파일 제거
       post.attachments = dto.attachments.map((file) =>
@@ -66,7 +67,21 @@ export class PostCommandService {
         }),
       );
     }
-  
+
+    await this.postRepo.save(post);
+  }
+
+  async softDelete(postId: number, userId: number): Promise<void> {
+    const post = await this.postRepo.findOne({
+      where: { id: postId },
+      relations: ['author'],
+      withDeleted: false,
+    });
+
+    if (!post) throw new PostNotFoundException();
+    if (post.author.id !== userId) throw new ForbiddenAccessException();
+
+    post.delete(new Date());
     await this.postRepo.save(post);
   }
 }

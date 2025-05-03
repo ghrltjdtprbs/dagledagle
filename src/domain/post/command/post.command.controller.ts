@@ -1,5 +1,14 @@
 // src/domain/post/command/post.command.controller.ts
-import { Body, Controller, Post, UseGuards, Req, Patch, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Req,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { PostCommandService } from './post.command.service';
 import { CreatePostRequestDto } from '../../post/dto/request/create-post.request.dto';
@@ -35,4 +44,17 @@ export class PostCommandController {
     await this.postCommandService.updatePost(+postId, req.user.id, dto);
     return '게시글 수정 완료';
   }
+
+  @Delete(':id')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
+@ApiOperation({
+  summary: '게시글 삭제',
+  description: '자신이 작성한 게시글을 소프트 삭제합니다.',
+})
+async deletePost(@Req() req, @Param('id') postId: string): Promise<string> {
+  await this.postCommandService.softDelete(+postId, req.user.id);
+  return '게시글 삭제 완료';
+}
+
 }
