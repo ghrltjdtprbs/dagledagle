@@ -1,10 +1,11 @@
 // src/domain/user/command/user.command.controller.ts
 
-import { Body, Controller, Post } from '@nestjs/common';
+import { Controller, Post, Body, Delete, UseGuards, Req } from '@nestjs/common';
+import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { UserCommandService } from './user.command.service';
 import { SignupRequestDto } from '../../user/dto/signup.request.dto';
 import { SignupResponseDto } from '../../user/dto/signup.response.dto';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('Users')
 @Controller('users')
@@ -24,5 +25,17 @@ export class UserCommandController {
       name: user.name,
       nickname: user.nickname,
     };
+  }
+
+  @Delete('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '회원 탈퇴',
+    description: '로그인한 사용자의 계정을 탈퇴(soft delete)합니다.',
+  })
+  async deleteUser(@Req() req): Promise<string> {
+    await this.userCommandService.softDelete(req.user.id);
+    return '회원 탈퇴 완료';
   }
 }

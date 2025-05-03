@@ -4,6 +4,7 @@ import { ErrorCode } from './error-code.enum';
 
 const errorStatusMap: Record<ErrorCode, HttpStatus> = {
   [ErrorCode.DUPLICATE_EMAIL]: HttpStatus.CONFLICT,
+  [ErrorCode.USER_NOT_FOUND]: HttpStatus.NOT_FOUND,
 };
 
 export class ApplicationException extends Error {

@@ -12,16 +12,22 @@ export class AuthTokenController {
   constructor(private readonly authTokenService: AuthTokenService) {}
 
   @Post('refresh')
-  @ApiOperation({ summary: 'AccessToken 재발급', description: 'RefreshToken을 이용해 새 AccessToken을 발급합니다.' })
+  @ApiOperation({
+    summary: 'AccessToken 재발급',
+    description: 'RefreshToken을 이용해 새 AccessToken을 발급합니다.',
+  })
   async refresh(@Body() dto: RefreshRequestDto): Promise<LoginResponseDto> {
     return this.authTokenService.refreshToken(dto.refreshToken);
   }
 
   @Delete('logout')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: '로그아웃', description: '현재 유저의 refreshToken을 삭제합니다.' })
-  async logout(@Req() req): Promise<{ message: string }> {
+  @ApiOperation({
+    summary: '로그아웃',
+    description: '현재 유저의 refreshToken을 삭제합니다.',
+  })
+  async logout(@Req() req): Promise<string> {
     await this.authTokenService.logout(req.user.id);
-    return { message: '로그아웃 완료' };
+    return '로그아웃 완료';
   }
 }

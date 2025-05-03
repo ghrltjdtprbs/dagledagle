@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entity/user.entity';
 import { DuplicateEmailException } from '../exception/duplicate-email.exception';
+import { UserNotFoundException } from '../exception/user-not-found.exception';
 
 @Injectable()
 export class UserCommandService {
@@ -34,5 +35,17 @@ export class UserCommandService {
     });
 
     return this.userRepository.save(user);
+  }
+
+  async softDelete(userId: number): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      withDeleted: false,
+    });
+
+    if (!user) throw new UserNotFoundException();
+
+    user.delete(new Date());
+    await this.userRepository.save(user);
   }
 }
