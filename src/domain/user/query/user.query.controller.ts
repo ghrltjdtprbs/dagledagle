@@ -1,8 +1,9 @@
 //src/domain/user/query/user.query.controller.ts
-import { Controller, Get, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { UserQueryService } from './user.query.service';
+import { UserProfileResponseDto } from '../../user/dto/user-profile.response.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -18,5 +19,14 @@ export class UserQueryController {
   })
   async getMe(@Req() req) {
     return this.userQueryService.getMyInfo(req.user.id);
+  }
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: '다른 유저 프로필 조회',
+    description: '유저 ID로 프로필을 조회합니다. 이메일은 포함되지 않습니다.',
+  })
+  async getUserProfile(@Param('id') id: string): Promise<UserProfileResponseDto> {
+    return this.userQueryService.getUserProfile(+id);
   }
 }
