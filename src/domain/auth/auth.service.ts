@@ -6,7 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { UserEntity } from '../user/entity/user.entity';
 import { RefreshTokenEntity } from './entity/refresh-token.entity';
-import { LoginResponseDto } from './dto/login.response.dto';
+import { LoginResponseDto } from './dto/response/login.response.dto';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +35,7 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn: '20s', // ✅ AccessToken 유효시간 1시간으로 수정
+      expiresIn: '1h',
     });
 
     const refreshToken = this.jwtService.sign(payload, {
@@ -44,12 +44,10 @@ export class AuthService {
     });
 
     const expiredAt = new Date();
-    expiredAt.setDate(expiredAt.getDate() + 7); // RefreshToken 만료일 설정 (7일 후)
+    expiredAt.setDate(expiredAt.getDate() + 7);
 
-    // 기존 RefreshToken 삭제 (유저당 하나 유지)
     await this.refreshTokenRepo.delete({ user: { id: user.id } });
 
-    // 새 RefreshToken 저장
     const tokenEntity = this.refreshTokenRepo.create({
       user,
       token: refreshToken,
