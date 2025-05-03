@@ -8,6 +8,7 @@ const errorStatusMap: Record<ErrorCode, HttpStatus> = {
   [ErrorCode.PASSWORD_MISMATCH]: HttpStatus.BAD_REQUEST,
   [ErrorCode.FORBIDDEN_ACCESS]: HttpStatus.FORBIDDEN,
   [ErrorCode.POST_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ErrorCode.COMMENT_NOT_FOUND]: HttpStatus.NOT_FOUND,
 };
 
 export class ApplicationException extends Error {

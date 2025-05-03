@@ -5,4 +5,5 @@ export enum ErrorCode {
   PASSWORD_MISMATCH = '현재 비밀번호가 일치하지 않습니다',
   FORBIDDEN_ACCESS = '권한이 없습니다',
   POST_NOT_FOUND = '존재하지 않는 게시글입니다',
+  COMMENT_NOT_FOUND = '존재하지 않는 댓글입니다',
 }
