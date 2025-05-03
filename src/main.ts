@@ -1,26 +1,40 @@
+// src/main.ts
+import 'dotenv/config'; 
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filter/global-exception.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { config } from './config'; // 환경별 설정 import
+
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  console.log('🚀 Starting app...');
+  console.log('🧪 Loaded config.database:', config.database);
 
-  // 1. 전역 예외 필터 등록
+  let app;
+  try {
+    app = await NestFactory.create(AppModule);
+  } catch (err) {
+    console.error('❌ AppModule 생성 중 에러:', err);
+    console.error(err?.stack); // ✅ 스택 트레이스까지 출력!
+    process.exit(1);
+  }
+
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // 2. Swagger 문서 설정
-  const config = new DocumentBuilder()
-    .setTitle('DagleDagle API')
-    .setDescription('API 명세서입니다.')
-    .setVersion('1.0')
-    .addBearerAuth() // JWT 인증 추가
-    .build();
+  if (config.swagger) {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('DagleDagle API')
+      .setDescription('API 명세서입니다.')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document); // http://localhost:3000/api-docs
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api-docs', app, document);
+  }
 
-  // 3. 앱 실행
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
