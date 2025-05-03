@@ -1,7 +1,7 @@
 // src/domain/user/user.entity.ts
 
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { SoftDeletableBaseEntity } from '../../common/entity/soft-delete-base.entity';
+import { SoftDeletableBaseEntity } from '../../../common/entity/soft-delete-base.entity';
 
 @Entity('users')
 export class UserEntity extends SoftDeletableBaseEntity {

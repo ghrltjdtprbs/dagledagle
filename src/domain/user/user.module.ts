@@ -3,7 +3,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { UserEntity } from './user.entity';
+import { UserEntity } from './entity/user.entity';
 import { UserCommandService } from './command/user.command.service';
 import { UserCommandController } from './command/user.command.controller';
 

@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
-import { UserEntity } from '../user.entity';
+import { UserEntity } from '../entity/user.entity';
 import { DuplicateEmailException } from '../exception/duplicate-email.exception';
 
 @Injectable()
