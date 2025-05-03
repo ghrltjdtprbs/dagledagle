@@ -3,16 +3,17 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { AuthModule } from './domain/auth/auth.module'; 
+import { AuthModule } from './domain/auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './domain/user/user.module';
+import { PostModule } from './domain/post/post.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env', 
+      envFilePath: '.env',
     }),
 
     TypeOrmModule.forRootAsync({
@@ -24,7 +25,7 @@ import { UserModule } from './domain/user/user.module';
         port: config.get<number>('DB_PORT'),
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
-        database: config.get<string>('DB_DATABASE'), 
+        database: config.get<string>('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity.{ts,js}'],
         synchronize: config.get<boolean>('DB_SYNCHRONIZE', false),
         logging: config.get<boolean>('DB_LOGGING', false),
@@ -32,7 +33,8 @@ import { UserModule } from './domain/user/user.module';
     }),
 
     UserModule,
-    AuthModule
+    AuthModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],

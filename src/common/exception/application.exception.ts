@@ -6,6 +6,7 @@ const errorStatusMap: Record<ErrorCode, HttpStatus> = {
   [ErrorCode.DUPLICATE_EMAIL]: HttpStatus.CONFLICT,
   [ErrorCode.USER_NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ErrorCode.PASSWORD_MISMATCH]: HttpStatus.BAD_REQUEST,
+  [ErrorCode.FORBIDDEN_ACCESS]: HttpStatus.FORBIDDEN,
 };
 
 export class ApplicationException extends Error {

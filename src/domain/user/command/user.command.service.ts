@@ -75,15 +75,18 @@ export class UserCommandService {
       where: { id: userId },
       withDeleted: false,
     });
-  
+
     if (!user) throw new UserNotFoundException();
-  
-    const isMatch = await bcrypt.compare(payload.currentPassword, user.password);
+
+    const isMatch = await bcrypt.compare(
+      payload.currentPassword,
+      user.password,
+    );
     if (!isMatch) {
       throw new PasswordMismatchException();
     }
-  
+
     user.password = await bcrypt.hash(payload.newPassword, 10);
     await this.userRepository.save(user);
-  }  
+  }
 }
