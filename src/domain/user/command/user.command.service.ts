@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { UserEntity } from '../entity/user.entity';
 import { DuplicateEmailException } from '../exception/duplicate-email.exception';
 import { UserNotFoundException } from '../exception/user-not-found.exception';
+import { PasswordMismatchException } from '../exception/password-mismatch.exception';
 
 @Injectable()
 export class UserCommandService {
@@ -57,12 +58,32 @@ export class UserCommandService {
       where: { id: userId },
       withDeleted: false,
     });
+
+    if (!user) throw new UserNotFoundException();
+
+    if (payload.name) user.name = payload.name;
+    if (payload.nickname) user.nickname = payload.nickname;
+
+    await this.userRepository.save(user);
+  }
+
+  async updatePassword(
+    userId: number,
+    payload: { currentPassword: string; newPassword: string },
+  ): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      withDeleted: false,
+    });
   
     if (!user) throw new UserNotFoundException();
   
-    if (payload.name) user.name = payload.name;
-    if (payload.nickname) user.nickname = payload.nickname;
+    const isMatch = await bcrypt.compare(payload.currentPassword, user.password);
+    if (!isMatch) {
+      throw new PasswordMismatchException();
+    }
   
+    user.password = await bcrypt.hash(payload.newPassword, 10);
     await this.userRepository.save(user);
-  }
+  }  
 }

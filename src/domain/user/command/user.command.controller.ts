@@ -15,6 +15,7 @@ import { SignupRequestDto } from '../dto/request/signup.request.dto';
 import { SignupResponseDto } from '../dto/response/signup.response.dto';
 import { UpdateMyInfoRequestDto } from '../dto/request/update-my-info.request.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { UpdatePasswordRequestDto } from '../dto/request/update-password.request.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -61,5 +62,20 @@ export class UserCommandController {
   ): Promise<string> {
     await this.userCommandService.updateUser(req.user.id, dto);
     return '회원 정보 수정 완료';
+  }
+
+  @Patch('me/password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '비밀번호 수정',
+    description: '현재 비밀번호를 확인하고, 새 비밀번호로 변경합니다.',
+  })
+  async updatePassword(
+    @Req() req,
+    @Body() dto: UpdatePasswordRequestDto,
+  ): Promise<string> {
+    await this.userCommandService.updatePassword(req.user.id, dto);
+    return '비밀번호 수정 완료';
   }
 }
