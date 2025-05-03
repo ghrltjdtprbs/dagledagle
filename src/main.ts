@@ -1,4 +1,3 @@
-// src/main.ts
 import 'dotenv/config';
 
 import { NestFactory } from '@nestjs/core';
@@ -6,7 +5,8 @@ import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filter/global-exception.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
-import { config } from './config'; // 환경별 설정 import
+import { config } from './config';
+import { SuccessInterceptor } from './common/interceptors/success.interceptor';
 
 async function bootstrap() {
   console.log('🚀 Starting app...');
@@ -17,7 +17,7 @@ async function bootstrap() {
     app = await NestFactory.create(AppModule);
   } catch (err) {
     console.error('❌ AppModule 생성 중 에러:', err);
-    console.error(err?.stack); // ✅ 스택 트레이스까지 출력!
+    console.error(err?.stack);
     process.exit(1);
   }
 
@@ -29,6 +29,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // ✅ 전역 성공 응답 인터셉터
+  app.useGlobalInterceptors(new SuccessInterceptor());
 
   // ✅ 전역 예외 필터
   app.useGlobalFilters(new GlobalExceptionFilter());
