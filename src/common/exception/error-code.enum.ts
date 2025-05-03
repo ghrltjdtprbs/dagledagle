@@ -6,4 +6,5 @@ export enum ErrorCode {
   FORBIDDEN_ACCESS = '권한이 없습니다',
   POST_NOT_FOUND = '존재하지 않는 게시글입니다',
   COMMENT_NOT_FOUND = '존재하지 않는 댓글입니다',
+  COMMENT_DEPTH_EXCEEDED = '대댓글은 1단계까지만 허용됩니다.',
 }

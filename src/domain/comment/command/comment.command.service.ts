@@ -8,6 +8,7 @@ import { CreateCommentRequestDto } from '../../comment/dto/request/create-commen
 import { CommentNotFoundException } from '../exception/comment-not-found.exception';
 import { ForbiddenAccessException } from '../../post/exception/forbidden-access.exception';
 import { UpdateCommentRequestDto } from '../../comment/dto/request/update-comment.request.dto';
+import { CommentDepthExceededException } from '../../comment/exception/comment-depth-exceeded.exception';
 
 @Injectable()
 export class CommentCommandService {
@@ -35,15 +36,22 @@ export class CommentCommandService {
     let parent: CommentEntity | null = null;
 
     if (dto.parentCommentId) {
-      parent = await this.commentRepo.findOneBy({ id: dto.parentCommentId });
+      parent = await this.commentRepo.findOne({
+        where: { id: dto.parentCommentId },
+        relations: ['parent'],
+      });
       if (!parent) throw new CommentNotFoundException();
+
+      if (parent) {
+        throw new CommentDepthExceededException();
+      }
     }
 
     const comment = this.commentRepo.create({
       content: dto.content,
       post,
       author: user,
-      parent: parent ?? null,
+      parent,
     });
 
     await this.commentRepo.save(comment);

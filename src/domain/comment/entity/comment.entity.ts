@@ -29,6 +29,9 @@ export class CommentEntity extends SoftDeletableBaseEntity {
   })
   parent: CommentEntity | null;
 
+  @Column({ nullable: true })
+  parentId: number | null;
+  
   @OneToMany(() => CommentEntity, (comment) => comment.parent)
   children: CommentEntity[];
 }
