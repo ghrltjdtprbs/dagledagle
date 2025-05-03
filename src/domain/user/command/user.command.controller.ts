@@ -3,8 +3,8 @@
 import { Controller, Post, Body, Delete, UseGuards, Req } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { UserCommandService } from './user.command.service';
-import { SignupRequestDto } from '../../user/dto/signup.request.dto';
-import { SignupResponseDto } from '../../user/dto/signup.response.dto';
+import { SignupRequestDto } from '../dto/request/signup.request.dto';
+import { SignupResponseDto } from '../dto/response/signup.response.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('Users')
