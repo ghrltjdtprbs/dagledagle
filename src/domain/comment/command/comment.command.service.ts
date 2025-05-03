@@ -6,6 +6,8 @@ import { UserEntity } from '../../user/entity/user.entity';
 import { PostEntity } from '../../post/entity/post.entity';
 import { CreateCommentRequestDto } from '../../comment/dto/request/create-comment.request.dto';
 import { CommentNotFoundException } from '../exception/comment-not-found.exception';
+import { ForbiddenAccessException } from '../../post/exception/forbidden-access.exception';
+import { UpdateCommentRequestDto } from '../../comment/dto/request/update-comment.request.dto';
 
 @Injectable()
 export class CommentCommandService {
@@ -44,6 +46,39 @@ export class CommentCommandService {
       parent: parent ?? null,
     });
 
+    await this.commentRepo.save(comment);
+  }
+
+  async softDelete(commentId: number, userId: number): Promise<void> {
+    const comment = await this.commentRepo.findOne({
+      where: { id: commentId },
+      relations: ['author', 'children'],
+      withDeleted: false,
+    });
+
+    if (!comment) throw new CommentNotFoundException();
+    if (comment.author.id !== userId) throw new ForbiddenAccessException();
+
+    comment.delete(new Date());
+    await this.commentRepo.save(comment);
+  }
+
+  async update(
+    commentId: number,
+    userId: number,
+    dto: UpdateCommentRequestDto,
+  ): Promise<void> {
+    const comment = await this.commentRepo.findOne({
+      where: { id: commentId },
+      relations: ['author'],
+      withDeleted: false,
+    });
+
+    if (!comment) throw new CommentNotFoundException();
+    if (comment.author.id !== userId) throw new ForbiddenAccessException();
+    if (comment.deletedAt) throw new ForbiddenAccessException();
+
+    comment.content = dto.content;
     await this.commentRepo.save(comment);
   }
 }

@@ -1,6 +1,16 @@
-import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+  Delete,
+  Patch,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { CreateCommentRequestDto } from '../../comment/dto/request/create-comment.request.dto';
+import { UpdateCommentRequestDto } from '../../comment/dto/request/update-comment.request.dto';
 import { CommentCommandService } from './comment.command.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -23,5 +33,36 @@ export class CommentCommandController {
   ): Promise<string> {
     await this.commentCommandService.createComment(req.user.id, +postId, dto);
     return '댓글 작성 완료';
+  }
+
+  @Delete('/:commentId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '댓글 삭제',
+    description: '자신이 작성한 댓글을 삭제합니다.',
+  })
+  async deleteComment(
+    @Req() req,
+    @Param('commentId') commentId: string,
+  ): Promise<string> {
+    await this.commentCommandService.softDelete(+commentId, req.user.id);
+    return '댓글 삭제 완료';
+  }
+
+  @Patch('/:commentId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '댓글 수정',
+    description: '자신이 작성한 댓글 내용을 수정합니다.',
+  })
+  async updateComment(
+    @Req() req,
+    @Param('commentId') commentId: string,
+    @Body() dto: UpdateCommentRequestDto,
+  ): Promise<string> {
+    await this.commentCommandService.update(+commentId, req.user.id, dto);
+    return '댓글 수정 완료';
   }
 }
