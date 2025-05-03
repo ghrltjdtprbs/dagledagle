@@ -32,7 +32,9 @@ export class AuthTokenService {
     });
 
     if (!found || new Date() > found.expiredAt) {
-      throw new UnauthorizedException('RefreshToken이 만료됐거나 존재하지 않음');
+      throw new UnauthorizedException(
+        'RefreshToken이 만료됐거나 존재하지 않음',
+      );
     }
 
     const newPayload = {
@@ -47,7 +49,11 @@ export class AuthTokenService {
 
     return {
       accessToken,
-      refreshToken: token, // 또는 갱신 전략 적용 가능
+      refreshToken: token,
     };
+  }
+
+  async logout(userId: number): Promise<void> {
+    await this.refreshTokenRepo.delete({ user: { id: userId } });
   }
 }

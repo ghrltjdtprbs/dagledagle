@@ -18,14 +18,7 @@ import { JwtStrategy } from '../../common/strategy/jwt.strategy';
     TypeOrmModule.forFeature([UserEntity, RefreshTokenEntity]),
     JwtModule.register({}),
   ],
-  controllers: [
-    AuthController,
-    AuthTokenController, 
-  ],
-  providers: [
-    AuthService,
-    AuthTokenService, 
-    JwtStrategy,
-  ],
+  controllers: [AuthController, AuthTokenController],
+  providers: [AuthService, AuthTokenService, JwtStrategy],
 })
 export class AuthModule {}

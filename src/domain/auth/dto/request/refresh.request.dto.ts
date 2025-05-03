@@ -3,7 +3,11 @@ import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RefreshRequestDto {
-  @ApiProperty({ example: 'refresh_token_here' })
+  @ApiProperty({
+    description: '리프레쉬 토큰',
+    example: 'eyJhbGciOiJIUzI1N...',
+    required: true,
+  })
   @IsString()
   refreshToken: string;
 }
