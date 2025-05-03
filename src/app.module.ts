@@ -24,7 +24,7 @@ import { UserModule } from './domain/user/user.module';
         port: config.get<number>('DB_PORT'),
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
-        database: config.get<string>('DB_DATABASE'), // ✅ 여기 제대로 들어옴
+        database: config.get<string>('DB_DATABASE'), 
         entities: [__dirname + '/**/*.entity.{ts,js}'],
         synchronize: config.get<boolean>('DB_SYNCHRONIZE', false),
         logging: config.get<boolean>('DB_LOGGING', false),

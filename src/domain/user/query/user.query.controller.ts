@@ -12,7 +12,10 @@ export class UserQueryController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: '내 정보 조회', description: '로그인한 사용자의 정보를 조회합니다.' })
+  @ApiOperation({
+    summary: '내 정보 조회',
+    description: '로그인한 사용자의 정보를 조회합니다.',
+  })
   async getMe(@Req() req) {
     return this.userQueryService.getMyInfo(req.user.id);
   }

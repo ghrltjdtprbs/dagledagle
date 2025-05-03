@@ -13,6 +13,6 @@ import { UserQueryService } from './query/user.query.service';
   imports: [TypeOrmModule.forFeature([UserEntity])],
   controllers: [UserCommandController, UserQueryController],
   providers: [UserCommandService, UserQueryService],
-  exports: [UserCommandService, UserQueryService], // ✅ 쉼표 추가
+  exports: [UserCommandService, UserQueryService],
 })
 export class UserModule {}

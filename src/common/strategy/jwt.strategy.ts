@@ -14,6 +14,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: any) {
-    return { id: payload.sub, email: payload.email }; // req.user에 들어감
+    return { id: payload.sub, email: payload.email }; 
   }
 }
