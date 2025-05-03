@@ -8,13 +8,13 @@ export class UserEntity extends SoftDeletableBaseEntity {
   @PrimaryGeneratedColumn()
   id: number; // pk
 
-  @Column({ unique: true })
+  @Column()
   email: string; // 이메일(로그인 아이디)
 
   @Column()
   name: string; // 사용자 이름
 
-  @Column({ unique: true })
+  @Column()
   nickname: string; // 닉네임
 
   @Column()
