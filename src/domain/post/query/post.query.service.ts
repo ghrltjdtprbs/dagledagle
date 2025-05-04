@@ -112,24 +112,38 @@ export class PostQueryService {
   }
 
   async getPosts(
-    params: { page: number; size: number; sort: 'latest' | 'popular' },
+    params: {
+      page: number;
+      size: number;
+      sort: 'latest' | 'popular';
+      search?: string;
+    },
     userId: number,
   ): Promise<PostListResponseDto> {
-    const { page, size, sort } = params;
+    const { page, size, sort, search } = params;
     const skip = (page - 1) * size;
 
-    const orderBy =
-      sort === 'popular'
-        ? ({ likeCount: 'DESC', id: 'DESC' } as const)
-        : ({ id: 'DESC' } as const);
+    const qb = this.postRepo
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .where('post.deletedAt IS NULL');
 
-    const [posts, totalCount] = await this.postRepo.findAndCount({
-      where: { deletedAt: IsNull() },
-      relations: ['author'],
-      order: orderBy,
-      skip,
-      take: size,
-    });
+    if (search) {
+      qb.andWhere(
+        '(post.title ILIKE :search OR post.content ILIKE :search OR author.nickname ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    if (sort === 'popular') {
+      qb.orderBy('post.likeCount', 'DESC').addOrderBy('post.id', 'DESC');
+    } else {
+      qb.orderBy('post.id', 'DESC');
+    }
+
+    qb.skip(skip).take(size);
+
+    const [posts, totalCount] = await qb.getManyAndCount();
 
     const likedPostIds = new Set(
       (
@@ -140,7 +154,7 @@ export class PostQueryService {
       ).map((like) => like.post.id),
     );
 
-    const items: PostSummaryResponseDto[] = posts.map((post) => ({
+    const items = posts.map((post) => ({
       id: post.id,
       title: post.title,
       author: {

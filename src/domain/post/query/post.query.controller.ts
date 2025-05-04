@@ -41,12 +41,16 @@ export class PostQueryController {
   })
   @ApiOkResponse({ type: PostListResponseDto })
   async getPosts(
+    @Req() req,
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,
     @Query('sort') sort: 'latest' | 'popular' = 'latest',
-    @Req() req,
+    @Query('search') search?: string,
   ) {
-    return this.postQueryService.getPosts({ page, size, sort }, req.user.id);
+    return this.postQueryService.getPosts(
+      { page, size, sort, search },
+      req.user.id,
+    );
   }
 
   @Get('summary/me')
