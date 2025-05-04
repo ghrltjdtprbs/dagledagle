@@ -10,6 +10,8 @@ import { ForbiddenAccessException } from '../../post/exception/forbidden-access.
 import { UpdateCommentRequestDto } from '../../comment/dto/request/update-comment.request.dto';
 import { CommentDepthExceededException } from '../../comment/exception/comment-depth-exceeded.exception';
 import { PostNotFoundException } from '@/domain/post/exception/post-not-found.exception';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationEvent } from '../../notification/event/notification.event';
 
 @Injectable()
 export class CommentCommandService {
@@ -22,6 +24,8 @@ export class CommentCommandService {
 
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async createComment(
@@ -33,6 +37,7 @@ export class CommentCommandService {
       this.userRepo.findOneByOrFail({ id: userId }),
       this.postRepo.findOne({
         where: { id: postId },
+        relations: ['author'],
         withDeleted: false,
       }),
     ]);
@@ -65,6 +70,16 @@ export class CommentCommandService {
 
     post.commentCount += 1;
     await this.postRepo.save(post);
+
+    if (post.author.id !== userId) {
+      this.eventEmitter.emit(
+        'notification.created',
+        new NotificationEvent(
+          post.author.id,
+          `게시글 "${post.title}"에 댓글이 달렸습니다.`,
+        ),
+      );
+    }
   }
 
   async softDelete(commentId: number, userId: number): Promise<void> {
