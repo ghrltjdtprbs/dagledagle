@@ -10,6 +10,7 @@ import { PostDetailResponseDto } from '../dto/response/post-detail.response.dto'
 import { CommentResponseDto } from '../../comment/dto/response/comment.response.dto';
 import { PostSummaryResponseDto } from '../dto/response/post-summary.response.dto';
 import { PostListResponseDto } from '../dto/response/post-list.response.dto';
+import { MyPostSummaryResponseDto } from '../dto/response/my-post-summary.response.dto';
 
 @Injectable()
 export class PostQueryService {
@@ -160,5 +161,24 @@ export class PostQueryService {
       totalCount,
       totalPages: Math.ceil(totalCount / size),
     };
+  }
+
+  async getMyPosts(userId: number): Promise<MyPostSummaryResponseDto[]> {
+    const posts = await this.postRepo
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .where('author.id = :userId', { userId })
+      .andWhere('post.deletedAt IS NULL')
+      .orderBy('post.id', 'DESC')
+      .getMany();
+
+    return posts.map((post) => ({
+      id: post.id,
+      title: post.title,
+      likeCount: post.likeCount,
+      commentCount: post.commentCount ?? 0,
+      viewCount: post.viewCount,
+      createdAt: post.createdAt,
+    }));
   }
 }

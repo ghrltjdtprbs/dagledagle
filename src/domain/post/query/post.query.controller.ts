@@ -11,6 +11,7 @@ import {
 import { PostQueryService } from './post.query.service';
 import { PostDetailResponseDto } from '../../post/dto/response/post-detail.response.dto';
 import { PostListResponseDto } from '../../post/dto/response/post-list.response.dto';
+import { MyPostSummaryResponseDto } from '../../post/dto/response/my-post-summary.response.dto';
 
 @ApiTags('Posts')
 @ApiBearerAuth()
@@ -46,5 +47,16 @@ export class PostQueryController {
     @Req() req,
   ) {
     return this.postQueryService.getPosts({ page, size, sort }, req.user.id);
+  }
+
+  @Get('summary/me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: '내 게시글 조회',
+    description: '내가 작성한 게시글 목록을 조회합니다.',
+  })
+  @ApiOkResponse({ type: [MyPostSummaryResponseDto] })
+  async getMyPosts(@Req() req): Promise<MyPostSummaryResponseDto[]> {
+    return this.postQueryService.getMyPosts(req.user.id);
   }
 }
