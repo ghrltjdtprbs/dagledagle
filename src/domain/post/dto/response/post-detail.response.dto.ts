@@ -1,12 +1,14 @@
 // src/domain/post/dto/response/post-detail.response.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
+import { AuthorSummaryDto } from './author-summary.dto';
+import { PostAttachmentDto } from './post-attachment.dto';
 import { CommentResponseDto } from '../../../comment/dto/response/comment.response.dto';
 
 export class PostDetailResponseDto {
   @ApiProperty({ example: 1, description: '게시글 ID' })
   id: number;
 
-  @ApiProperty({ example: '[삭제된 게시글입니다]', description: '게시글 제목' })
+  @ApiProperty({ example: '게시글 제목', description: '게시글 제목' })
   title: string;
 
   @ApiProperty({ example: '게시글 내용입니다.', description: '게시글 본문' })
@@ -14,13 +16,9 @@ export class PostDetailResponseDto {
 
   @ApiProperty({
     description: '게시글 작성자 정보',
-    type: () => Object,
-    example: { id: 3, nickname: '작성자닉네임' },
+    type: AuthorSummaryDto,
   })
-  author: {
-    id: number;
-    nickname: string;
-  };
+  author: AuthorSummaryDto;
 
   @ApiProperty({ example: 123, description: '게시글 조회수' })
   viewCount: number;
@@ -39,24 +37,13 @@ export class PostDetailResponseDto {
 
   @ApiProperty({
     description: '첨부파일 목록',
-    type: [Object],
-    example: [
-      {
-        fileName: 'abc123.png',
-        originalName: '강의자료.png',
-        fileUrl: 'https://bucket.s3.amazonaws.com/abc123.png',
-      },
-    ],
+    type: [PostAttachmentDto],
   })
-  attachments: {
-    fileName: string;
-    originalName: string;
-    fileUrl: string;
-  }[];
+  attachments: PostAttachmentDto[];
 
   @ApiProperty({
     description: '댓글 목록',
-    type: () => [CommentResponseDto],
+    type: [CommentResponseDto],
   })
   comments: CommentResponseDto[];
 }
