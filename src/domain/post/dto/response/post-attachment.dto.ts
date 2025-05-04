@@ -5,7 +5,10 @@ export class PostAttachmentDto {
   @ApiProperty({ example: 'abc123.png', description: 'S3 저장 파일명' })
   fileName: string;
 
-  @ApiProperty({ example: '강의자료.png', description: '사용자가 업로드한 파일명' })
+  @ApiProperty({
+    example: '강의자료.png',
+    description: '사용자가 업로드한 파일명',
+  })
   originalName: string;
 
   @ApiProperty({

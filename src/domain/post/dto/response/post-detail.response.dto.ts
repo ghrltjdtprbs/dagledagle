@@ -46,4 +46,10 @@ export class PostDetailResponseDto {
     type: [CommentResponseDto],
   })
   comments: CommentResponseDto[];
+
+  @ApiProperty({
+    description: '게시글 작성 일자 (ISO 형식)',
+    example: '2024-12-25T12:34:56.789Z',
+  })
+  createdAt: Date;
 }

@@ -29,4 +29,10 @@ export class PostSummaryResponseDto {
     description: '현재 사용자가 해당 게시글에 좋아요를 눌렀는지 여부',
   })
   isLiked: boolean;
+
+  @ApiProperty({
+    description: '게시글 작성 일자 (ISO 형식)',
+    example: '2024-12-25T12:34:56.789Z',
+  })
+  createdAt: Date;
 }

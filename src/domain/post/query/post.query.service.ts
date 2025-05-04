@@ -22,7 +22,10 @@ export class PostQueryService {
     private readonly likeRepo: Repository<LikeEntity>,
   ) {}
 
-  async getPostDetail(postId: number, userId: number): Promise<PostDetailResponseDto> {
+  async getPostDetail(
+    postId: number,
+    userId: number,
+  ): Promise<PostDetailResponseDto> {
     const post = await this.postRepo.findOne({
       where: { id: postId },
       relations: ['author', 'attachments'],
@@ -65,7 +68,9 @@ export class PostQueryService {
     return {
       id: post.id,
       title: post.deletedAt ? '[삭제된 게시글입니다]' : post.title,
-      content: post.deletedAt ? '작성자가 게시글을 삭제했습니다.' : post.content,
+      content: post.deletedAt
+        ? '작성자가 게시글을 삭제했습니다.'
+        : post.content,
       author: post.author
         ? { id: post.author.id, nickname: post.author.nickname }
         : { id: 0, nickname: '[탈퇴한 사용자]' },
@@ -79,6 +84,7 @@ export class PostQueryService {
         fileUrl: a.fileUrl,
       })),
       comments: commentDtos,
+      createdAt: post.createdAt,
     };
   }
 
@@ -144,6 +150,7 @@ export class PostQueryService {
       likeCount: post.likeCount,
       commentCount: post.commentCount ?? 0,
       isLiked: likedPostIds.has(post.id),
+      createdAt: post.createdAt,
     }));
 
     return {
