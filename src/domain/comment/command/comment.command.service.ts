@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CommentEntity } from '../entity/comment.entity';
@@ -9,6 +9,7 @@ import { CommentNotFoundException } from '../exception/comment-not-found.excepti
 import { ForbiddenAccessException } from '../../post/exception/forbidden-access.exception';
 import { UpdateCommentRequestDto } from '../../comment/dto/request/update-comment.request.dto';
 import { CommentDepthExceededException } from '../../comment/exception/comment-depth-exceeded.exception';
+import { PostNotFoundException } from '@/domain/post/exception/post-not-found.exception';
 
 @Injectable()
 export class CommentCommandService {
@@ -30,8 +31,13 @@ export class CommentCommandService {
   ): Promise<void> {
     const [user, post] = await Promise.all([
       this.userRepo.findOneByOrFail({ id: userId }),
-      this.postRepo.findOneByOrFail({ id: postId }),
+      this.postRepo.findOne({
+        where: { id: postId },
+        withDeleted: false,
+      }),
     ]);
+
+    if (!post) throw new PostNotFoundException();
 
     let parent: CommentEntity | null = null;
 
@@ -40,6 +46,7 @@ export class CommentCommandService {
         where: { id: dto.parentCommentId },
         relations: ['parent'],
       });
+
       if (!parent) throw new CommentNotFoundException();
 
       if (parent) {
@@ -55,12 +62,15 @@ export class CommentCommandService {
     });
 
     await this.commentRepo.save(comment);
+
+    post.commentCount += 1;
+    await this.postRepo.save(post);
   }
 
   async softDelete(commentId: number, userId: number): Promise<void> {
     const comment = await this.commentRepo.findOne({
       where: { id: commentId },
-      relations: ['author', 'children'],
+      relations: ['author', 'children', 'post'],
       withDeleted: false,
     });
 
@@ -69,6 +79,9 @@ export class CommentCommandService {
 
     comment.delete(new Date());
     await this.commentRepo.save(comment);
+
+    comment.post.commentCount = Math.max(0, comment.post.commentCount - 1);
+    await this.postRepo.save(comment.post);
   }
 
   async update(
