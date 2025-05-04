@@ -3,6 +3,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { SoftDeletableBaseEntity } from '../../../common/entity/soft-delete-base.entity';
 import { PostEntity } from '@/domain/post/entity/post.entity';
+import { NotificationEntity } from '@/domain/notification/entity/notification.entity';
+import { CommentEntity } from '@/domain/comment/entity/comment.entity';
+import { LikeEntity } from '@/domain/like/entity/like.entity';
 
 @Entity('users')
 export class UserEntity extends SoftDeletableBaseEntity {
@@ -23,4 +26,13 @@ export class UserEntity extends SoftDeletableBaseEntity {
 
   @OneToMany(() => PostEntity, (post) => post.author)
   posts: PostEntity[];
+
+  @OneToMany(() => NotificationEntity, (notification) => notification.user)
+  notifications: NotificationEntity[];
+
+  @OneToMany(() => CommentEntity, (comment) => comment.author)
+  comments: CommentEntity[];
+
+  @OneToMany(() => LikeEntity, (like) => like.user)
+  likes: LikeEntity[];
 }

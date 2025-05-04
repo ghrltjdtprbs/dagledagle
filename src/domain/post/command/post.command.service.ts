@@ -9,6 +9,8 @@ import { CreatePostRequestDto } from '../../post/dto/request/create-post.request
 import { UpdatePostRequestDto } from '../../post/dto/request/update-post.request.dto';
 import { ForbiddenAccessException } from '../exception/forbidden-access.exception';
 import { PostNotFoundException } from '../exception/post-not-found.exception';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationEvent } from '../../notification/event/notification.event';
 
 @Injectable()
 export class PostCommandService {
@@ -21,6 +23,8 @@ export class PostCommandService {
 
     @InjectRepository(PostAttachmentEntity)
     private readonly postAttachmentRepo: Repository<PostAttachmentEntity>,
+
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async createPost(userId: number, dto: CreatePostRequestDto): Promise<void> {
@@ -51,14 +55,13 @@ export class PostCommandService {
       withDeleted: false,
     });
 
-    if (!post) throw new Error('게시글이 존재하지 않습니다.');
+    if (!post) throw new PostNotFoundException();
     if (post.author.id !== userId) throw new ForbiddenAccessException();
 
     if (dto.title) post.title = dto.title;
     if (dto.content) post.content = dto.content;
 
     if (dto.attachments) {
-      // 기존 첨부파일 제거
       post.attachments = dto.attachments.map((file) =>
         this.postAttachmentRepo.create({
           fileName: file.fileName,
@@ -69,6 +72,38 @@ export class PostCommandService {
     }
 
     await this.postRepo.save(post);
+
+    // ✅ 댓글 단 유저와 좋아요 누른 유저 불러오기
+    const [commentUsers, likeUsers] = await Promise.all([
+      this.userRepo
+        .createQueryBuilder('user')
+        .innerJoin('user.comments', 'comment', 'comment.postId = :postId', {
+          postId,
+        })
+        .getMany(),
+
+      this.userRepo
+        .createQueryBuilder('user')
+        .innerJoin('user.likes', 'like', 'like.postId = :postId', {
+          postId,
+        })
+        .getMany(),
+    ]);
+
+    const notifiedUserIds = new Set<number>();
+
+    [...commentUsers, ...likeUsers].forEach((user) => {
+      if (user.id !== userId && !notifiedUserIds.has(user.id)) {
+        this.eventEmitter.emit(
+          'notification.created',
+          new NotificationEvent(
+            user.id,
+            `게시글 "${post.title}"이 수정되었습니다.`,
+          ),
+        );
+        notifiedUserIds.add(user.id);
+      }
+    });
   }
 
   async softDelete(postId: number, userId: number): Promise<void> {
