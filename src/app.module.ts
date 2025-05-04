@@ -1,4 +1,3 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -10,6 +9,8 @@ import { UserModule } from './domain/user/user.module';
 import { PostModule } from './domain/post/post.module';
 import { CommentModule } from './domain/comment/comment.module';
 import { LikeModule } from './domain/like/like.module';
+import { NotificationModule } from './domain/notification/notification.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -17,6 +18,8 @@ import { LikeModule } from './domain/like/like.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+
+    EventEmitterModule.forRoot(),
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -39,6 +42,7 @@ import { LikeModule } from './domain/like/like.module';
     PostModule,
     CommentModule,
     LikeModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
