@@ -14,5 +14,5 @@ services:
       - .:/app              # 코드 핫리로드
       - /app/node_modules   # 의존성 격리
     env_file:
-      - .env.dev
+      - .env
     command: npm run start:dev
