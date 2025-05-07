@@ -10,5 +10,8 @@ export default () => ({
     synchronize: false,
     logging: false,
   },
+  jwt: {
+    Secret: process.env.JWT_SECRET,
+  },
   swagger: false,
 });
