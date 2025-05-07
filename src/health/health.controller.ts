@@ -1,7 +1,7 @@
 // src/health/health.controller.ts
 import { Controller, Get } from '@nestjs/common';
 
-@Controller('')
+@Controller('health')
 export class HealthController {
   @Get()
   check() {
