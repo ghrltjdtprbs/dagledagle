@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup SSH Agent
+      - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
@@ -22,7 +22,7 @@ jobs:
         run: |
           ssh-keyscan -H ${{ secrets.DEV_EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy via SSH
+      - name: Deploy to EC2 via SSH
         env:
           DEV_DB_HOST: ${{ secrets.DEV_DB_HOST }}
           DEV_DB_PORT: ${{ secrets.DEV_DB_PORT }}
@@ -31,7 +31,7 @@ jobs:
           DEV_DB_DATABASE: ${{ secrets.DEV_DB_DATABASE }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} bash -s << 'EOF'
+          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} <<EOF
             set -e
 
             if [ ! -d dagledagle ]; then
@@ -42,7 +42,6 @@ jobs:
             git checkout dev
             git pull origin dev
 
-            # .env.dev 생성
             cat > .env.dev <<EOT
 NODE_ENV=development
 DEV_DB_HOST=$DEV_DB_HOST
@@ -55,4 +54,4 @@ EOT
 
             docker compose -f docker-compose.dev.yml down || true
             docker compose -f docker-compose.dev.yml up -d --build
-          EOF
+EOF
