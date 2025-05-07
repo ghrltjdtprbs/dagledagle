@@ -23,15 +23,8 @@ jobs:
           ssh-keyscan -H ${{ secrets.DEV_EC2_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to EC2 via SSH
-        env:
-          DEV_DB_HOST: ${{ secrets.DEV_DB_HOST }}
-          DEV_DB_PORT: ${{ secrets.DEV_DB_PORT }}
-          DEV_DB_USERNAME: ${{ secrets.DEV_DB_USERNAME }}
-          DEV_DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
-          DEV_DB_DATABASE: ${{ secrets.DEV_DB_DATABASE }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} << 'EOF'
+          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} << EOF
             set -e
 
             if [ ! -d dagledagle ]; then
@@ -42,15 +35,16 @@ jobs:
             git checkout dev
             git pull origin dev
 
-            cat <<EOT > .env.dev
+            # 템플릿 기반 .env.dev 생성
+            echo '
 NODE_ENV=development
-DEV_DB_HOST=$DEV_DB_HOST
-DEV_DB_PORT=$DEV_DB_PORT
-DEV_DB_USERNAME=$DEV_DB_USERNAME
-DEV_DB_PASSWORD=$DEV_DB_PASSWORD
-DEV_DB_DATABASE=$DEV_DB_DATABASE
-JWT_SECRET=$JWT_SECRET
-EOT
+DEV_DB_HOST=${{ secrets.DEV_DB_HOST }}
+DEV_DB_PORT=${{ secrets.DEV_DB_PORT }}
+DEV_DB_USERNAME=${{ secrets.DEV_DB_USERNAME }}
+DEV_DB_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}
+DEV_DB_DATABASE=${{ secrets.DEV_DB_DATABASE }}
+JWT_SECRET=${{ secrets.JWT_SECRET }}
+' > .env.dev
 
             docker compose -f docker-compose.dev.yml down || true
             docker compose -f docker-compose.dev.yml up -d --build
