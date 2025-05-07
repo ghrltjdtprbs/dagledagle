@@ -27,5 +27,8 @@ RUN npm ci --omit=dev
 # 빌드 결과물만 복사
 COPY --from=builder /app/dist ./dist
 
+# 포트 명시
+EXPOSE 80
+
 # 실행
 CMD ["node", "dist/main.js"]
