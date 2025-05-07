@@ -23,8 +23,15 @@ jobs:
           ssh-keyscan -H ${{ secrets.DEV_EC2_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to EC2 via SSH
+        env:
+          DB_HOST: ${{ secrets.DEV_DB_HOST }}
+          DB_PORT: ${{ secrets.DEV_DB_PORT }}
+          DB_USERNAME: ${{ secrets.DEV_DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
+          DB_DATABASE: ${{ secrets.DEV_DB_DATABASE }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} <<EOF
+          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} << 'EOF'
             set -e
 
             # git 설치
@@ -41,12 +48,12 @@ jobs:
             git pull origin dev
 
             echo "NODE_ENV=development" > .env.dev
-            echo "DB_HOST=${{ secrets.DEV_DB_HOST }}" >> .env.dev
-            echo "DB_PORT=${{ secrets.DEV_DB_PORT }}" >> .env.dev
-            echo "DB_USERNAME=${{ secrets.DEV_DB_USERNAME }}" >> .env.dev
-            echo "DB_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}" >> .env.dev
-            echo "DB_DATABASE=${{ secrets.DEV_DB_DATABASE }}" >> .env.dev
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.dev
+            echo "DB_HOST=$DB_HOST" >> .env.dev
+            echo "DB_PORT=$DB_PORT" >> .env.dev
+            echo "DB_USERNAME=$DB_USERNAME" >> .env.dev
+            echo "DB_PASSWORD=$DB_PASSWORD" >> .env.dev
+            echo "DB_DATABASE=$DB_DATABASE" >> .env.dev
+            echo "JWT_SECRET=$JWT_SECRET" >> .env.dev
 
             docker compose -f docker-compose.dev.yml down || true
             docker compose -f docker-compose.dev.yml up -d --build
