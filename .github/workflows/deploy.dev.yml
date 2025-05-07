@@ -61,6 +61,6 @@ jobs:
             echo "JWT_SECRET=$JWT_SECRET" >> .env.dev
 
             # Docker 배포
-            docker compose -f docker-compose.dev.yml down || true
-            docker compose -f docker-compose.dev.yml up -d --build
+            docker-compose -f docker-compose.dev.yml down || true
+            docker-compose -f docker-compose.dev.yml up -d --build
           '
