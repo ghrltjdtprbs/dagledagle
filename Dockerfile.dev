@@ -12,11 +12,6 @@ RUN npm install
 # 소스 복사
 COPY . .
 
-# 개발 서버용 환경변수 세팅은 따로 .env.dev에서 처리
-
-# dev 환경은 핫리로드용 도구 설치 필요 (npm i -D @nestjs/cli ts-node-dev)
-RUN npm install -g @nestjs/cli
-
 EXPOSE 80
 
 # 핫리로드 실행
