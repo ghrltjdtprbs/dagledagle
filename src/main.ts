@@ -4,7 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filter/global-exception.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { config } from './config';
 import { SuccessInterceptor } from './common/interceptors/success.interceptor';
 
@@ -21,7 +21,7 @@ async function bootstrap() {
     process.exit(1);
   }
 
-  // ✅ 전역 유효성 검사 파이프
+  // 전역 유효성 검사 파이프
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -30,13 +30,13 @@ async function bootstrap() {
     }),
   );
 
-  // ✅ 전역 성공 응답 인터셉터
+  // 전역 성공 응답 인터셉터
   app.useGlobalInterceptors(new SuccessInterceptor());
 
-  // ✅ 전역 예외 필터
+  // 전역 예외 필터
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // ✅ Swagger 문서 설정
+  // Swagger 문서 설정
   if (config.swagger) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('DagleDagle API')
@@ -49,6 +49,7 @@ async function bootstrap() {
     SwaggerModule.setup('api-docs', app, document);
   }
 
-  await app.listen(process.env.PORT ?? 3000);
+  //  무조건 포트 80으로 서버 실행
+  await app.listen(80);
 }
 bootstrap();
