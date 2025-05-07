@@ -26,7 +26,7 @@ jobs:
 
       - name: Generate .env
         run: |
-          echo "NODE_ENV=development" > .env
+          echo "NODE_ENV=dev" > .env
           echo "DB_HOST=${{ secrets.DEV_DB_HOST }}" >> .env
           echo "DB_PORT=${{ secrets.DEV_DB_PORT }}" >> .env
           echo "DB_USERNAME=${{ secrets.DEV_DB_USERNAME }}" >> .env
