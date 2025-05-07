@@ -30,19 +30,11 @@ jobs:
           DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
           DB_DATABASE: ${{ secrets.DEV_DB_DATABASE }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          GH_DEPLOY_KEY: ${{ secrets.GH_DEPLOY_KEY }}
         run: |
           ssh ec2-user@${{ secrets.DEV_EC2_HOST }} '
             set -e
 
-            # SSH 키 설정
-            mkdir -p ~/.ssh
-            echo "$GH_DEPLOY_KEY" > ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa
-            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            echo "Host github.com" >> ~/.ssh/config
-            echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-            echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
+      
 
             # Git 설치
             if ! command -v git &> /dev/null; then
