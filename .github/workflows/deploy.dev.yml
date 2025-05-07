@@ -1,67 +1,44 @@
-name: Deploy to EC2 (Development)
+- name: Deploy to EC2 via SSH
+  env:
+    DB_HOST: ${{ secrets.DEV_DB_HOST }}
+    DB_PORT: ${{ secrets.DEV_DB_PORT }}
+    DB_USERNAME: ${{ secrets.DEV_DB_USERNAME }}
+    DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
+    DB_DATABASE: ${{ secrets.DEV_DB_DATABASE }}
+    JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    GH_DEPLOY_KEY: ${{ secrets.GH_DEPLOY_KEY }}
+  run: |
+    ssh ec2-user@${{ secrets.DEV_EC2_HOST }} '
+      set -e
 
-on:
-  push:
-    branches: ["develop"]
+      mkdir -p ~/.ssh
+      echo "$GH_DEPLOY_KEY" > ~/.ssh/id_rsa
+      chmod 600 ~/.ssh/id_rsa
 
-jobs:
-  deploy:
-    name: Deploy Dev EC2
-    runs-on: ubuntu-latest
+      echo "Host github.com" >> ~/.ssh/config
+      echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+      echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      if ! command -v git &> /dev/null; then
+        sudo yum install -y git
+      fi
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+      if [ ! -d dagledagle ]; then
+        git clone git@github.com:ghrltjdtprbs/dagledagle.git
+      fi
 
-      - name: Add EC2 to known_hosts
-        run: |
-          ssh-keyscan -H ${{ secrets.DEV_EC2_HOST }} >> ~/.ssh/known_hosts
+      cd dagledagle
+      git checkout dev
+      git pull origin dev
 
-      - name: Deploy to EC2 via SSH
-        env:
-          DB_HOST: ${{ secrets.DEV_DB_HOST }}
-          DB_PORT: ${{ secrets.DEV_DB_PORT }}
-          DB_USERNAME: ${{ secrets.DEV_DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
-          DB_DATABASE: ${{ secrets.DEV_DB_DATABASE }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        run: |
-          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} '
-            set -e
+      echo "NODE_ENV=development" > .env.dev
+      echo "DB_HOST=$DB_HOST" >> .env.dev
+      echo "DB_PORT=$DB_PORT" >> .env.dev
+      echo "DB_USERNAME=$DB_USERNAME" >> .env.dev
+      echo "DB_PASSWORD=$DB_PASSWORD" >> .env.dev
+      echo "DB_DATABASE=$DB_DATABASE" >> .env.dev
+      echo "JWT_SECRET=$JWT_SECRET" >> .env.dev
 
-            mkdir -p ~/.ssh
-            chmod 700 ~/.ssh
-            touch ~/.ssh/config
-            chmod 600 ~/.ssh/config
-            echo "Host github.com" >> ~/.ssh/config
-            echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-            echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
-
-            if ! command -v git &> /dev/null; then
-              sudo yum install -y git
-            fi
-
-            if [ ! -d dagledagle ]; then
-              git clone git@github.com:ghrltjdtprbs/dagledagle.git
-            fi
-
-            cd dagledagle
-            git checkout dev
-            git pull origin dev
-
-            echo "NODE_ENV=development" > .env.dev
-            echo "DB_HOST=$DB_HOST" >> .env.dev
-            echo "DB_PORT=$DB_PORT" >> .env.dev
-            echo "DB_USERNAME=$DB_USERNAME" >> .env.dev
-            echo "DB_PASSWORD=$DB_PASSWORD" >> .env.dev
-            echo "DB_DATABASE=$DB_DATABASE" >> .env.dev
-            echo "JWT_SECRET=$JWT_SECRET" >> .env.dev
-
-            docker compose -f docker-compose.dev.yml down || true
-            docker compose -f docker-compose.dev.yml up -d --build
-          '
+      docker compose -f docker-compose.dev.yml down || true
+      docker compose -f docker-compose.dev.yml up -d --build
+    '
