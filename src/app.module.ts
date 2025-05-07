@@ -11,6 +11,7 @@ import { CommentModule } from './domain/comment/comment.module';
 import { LikeModule } from './domain/like/like.module';
 import { NotificationModule } from './domain/notification/notification.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     CommentModule,
     LikeModule,
     NotificationModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

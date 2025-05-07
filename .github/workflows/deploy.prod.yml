@@ -7,7 +7,7 @@ on:
 env:
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: dagledagle-repo
-  ECS_SERVICE: dagledagle-service
+  ECS_SERVICE: dagledagle-task-service-rwd6qr89
   ECS_CLUSTER: dagledagle-cluster
   ECS_TASK_DEFINITION: .aws/prod-dagledagle-task.json
   CONTAINER_NAME: dagledagle-container
