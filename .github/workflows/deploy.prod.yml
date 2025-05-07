@@ -63,13 +63,13 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ env.image }}
           environment-variables: |
-            NODE_ENV=production
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            PROD_DB_HOST=${{ secrets.PROD_DB_HOST }}
-            PROD_DB_PORT=${{ secrets.PROD_DB_PORT }}
-            PROD_DB_USERNAME=${{ secrets.PROD_DB_USERNAME }}
-            PROD_DB_PASSWORD=${{ secrets.PROD_DB_PASSWORD }}
-            PROD_DB_DATABASE=${{ secrets.PROD_DB_DATABASE }}
+           DB_HOST=${{ secrets.PROD_DB_HOST }}
+           DB_PORT=${{ secrets.PROD_DB_PORT }}
+           DB_USERNAME=${{ secrets.PROD_DB_USERNAME }}
+           DB_PASSWORD=${{ secrets.PROD_DB_PASSWORD }}
+           DB_DATABASE=${{ secrets.PROD_DB_DATABASE }}
+           JWT_SECRET=${{ secrets.JWT_SECRET }}
+           NODE_ENV=production
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
