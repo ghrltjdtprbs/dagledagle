@@ -31,24 +31,14 @@ jobs:
           DB_DATABASE: ${{ secrets.DEV_DB_DATABASE }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} bash -s <<'ENDSSH'
+          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} <<EOF
             set -e
 
-            # 필수 패키지 설치
+            # git 없으면 설치
             if ! command -v git &> /dev/null; then
               sudo yum install -y git
             fi
-            if ! command -v docker &> /dev/null; then
-              sudo yum install -y docker
-              sudo systemctl start docker
-              sudo usermod -aG docker ec2-user
-            fi
-            if ! command -v docker-compose &> /dev/null; then
-              sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-              sudo chmod +x /usr/local/bin/docker-compose
-            fi
 
-            # 리포지토리 클론 또는 pull
             if [ ! -d dagledagle ]; then
               git clone https://github.com/ghrltjdtprbs/dagledagle.git
             fi
@@ -57,18 +47,14 @@ jobs:
             git checkout dev
             git pull origin dev
 
-            # .env.dev 생성
-            cat > .env.dev <<EOF
-NODE_ENV=development
-DB_HOST=$DB_HOST
-DB_PORT=$DB_PORT
-DB_USERNAME=$DB_USERNAME
-DB_PASSWORD=$DB_PASSWORD
-DB_DATABASE=$DB_DATABASE
-JWT_SECRET=$JWT_SECRET
-EOF
+            echo "NODE_ENV=development" > .env.dev
+            echo "DB_HOST=\$DB_HOST" >> .env.dev
+            echo "DB_PORT=\$DB_PORT" >> .env.dev
+            echo "DB_USERNAME=\$DB_USERNAME" >> .env.dev
+            echo "DB_PASSWORD=\$DB_PASSWORD" >> .env.dev
+            echo "DB_DATABASE=\$DB_DATABASE" >> .env.dev
+            echo "JWT_SECRET=\$JWT_SECRET" >> .env.dev
 
-            # 도커 실행
-            docker-compose -f docker-compose.dev.yml down || true
-            docker-compose -f docker-compose.dev.yml up -d --build
-ENDSSH
+            docker compose -f docker-compose.dev.yml down || true
+            docker compose -f docker-compose.dev.yml up -d --build
+EOF
