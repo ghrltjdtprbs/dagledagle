@@ -2,7 +2,7 @@ name: Deploy to EC2 (Development)
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: ["develop"]
 
 jobs:
   deploy:
@@ -31,27 +31,21 @@ jobs:
           DB_DATABASE: ${{ secrets.DEV_DB_DATABASE }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} << 'EOF'
+          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} '
             set -e
 
-            # SSH config 설정 (GitHub 접속용)
             mkdir -p ~/.ssh
             chmod 700 ~/.ssh
             touch ~/.ssh/config
             chmod 600 ~/.ssh/config
+            echo "Host github.com" >> ~/.ssh/config
+            echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+            echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
 
-            cat <<CFG >> ~/.ssh/config
-Host github.com
-  StrictHostKeyChecking no
-  IdentityFile ~/.ssh/id_rsa
-CFG
-
-            # git 없으면 설치
             if ! command -v git &> /dev/null; then
               sudo yum install -y git
             fi
 
-            # repo 없으면 clone
             if [ ! -d dagledagle ]; then
               git clone git@github.com:ghrltjdtprbs/dagledagle.git
             fi
@@ -60,7 +54,6 @@ CFG
             git checkout dev
             git pull origin dev
 
-            # .env.dev 작성
             echo "NODE_ENV=development" > .env.dev
             echo "DB_HOST=$DB_HOST" >> .env.dev
             echo "DB_PORT=$DB_PORT" >> .env.dev
@@ -69,7 +62,6 @@ CFG
             echo "DB_DATABASE=$DB_DATABASE" >> .env.dev
             echo "JWT_SECRET=$JWT_SECRET" >> .env.dev
 
-            # Docker 재빌드 및 실행
             docker compose -f docker-compose.dev.yml down || true
             docker compose -f docker-compose.dev.yml up -d --build
-          EOF
+          '
