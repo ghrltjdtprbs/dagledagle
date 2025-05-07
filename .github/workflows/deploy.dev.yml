@@ -47,8 +47,9 @@ jobs:
             fi
 
             cd dagledagle
-            git checkout dev
-            git pull origin dev
+            git fetch origin
+            git checkout -B develop origin/develop
+
 
             # 환경 변수 파일 생성
             echo "NODE_ENV=development" > .env.dev
