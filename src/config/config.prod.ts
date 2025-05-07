@@ -11,5 +11,8 @@ export default () => ({
       rejectUnauthorized: false, 
     },
   },
+  jwt: {
+    Secret: process.env.JWT_SECRET,
+  },
   swagger: false,
 });
