@@ -35,6 +35,9 @@ import { HealthModule } from './health/health.module';
         entities: [__dirname + '/**/*.entity.{ts,js}'],
         synchronize: config.get<boolean>('DB_SYNCHRONIZE', false),
         logging: config.get<boolean>('DB_LOGGING', false),
+        ssl: {
+          rejectUnauthorized: false,
+        },
       }),
     }),
 
