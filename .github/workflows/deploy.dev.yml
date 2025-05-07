@@ -22,26 +22,31 @@ jobs:
         run: |
           ssh-keyscan -H ${{ secrets.DEV_EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to EC2 via SSH
-        env:
-          DB_HOST: ${{ secrets.DEV_DB_HOST }}
-          DB_PORT: ${{ secrets.DEV_DB_PORT }}
-          DB_USERNAME: ${{ secrets.DEV_DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
-          DB_DATABASE: ${{ secrets.DEV_DB_DATABASE }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      - name: Generate .env.dev
+        run: |
+          echo "NODE_ENV=development" > .env.dev
+          echo "DB_HOST=${{ secrets.DEV_DB_HOST }}" >> .env.dev
+          echo "DB_PORT=${{ secrets.DEV_DB_PORT }}" >> .env.dev
+          echo "DB_USERNAME=${{ secrets.DEV_DB_USERNAME }}" >> .env.dev
+          echo "DB_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}" >> .env.dev
+          echo "DB_DATABASE=${{ secrets.DEV_DB_DATABASE }}" >> .env.dev
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.dev
+
+      - name: Upload .env.dev to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no .env.dev ec2-user@${{ secrets.DEV_EC2_HOST }}:/home/ec2-user/dagledagle/.env.dev
+
+      - name: Deploy via SSH
         run: |
           ssh ec2-user@${{ secrets.DEV_EC2_HOST }} '
             set -e
-
-      
 
             # Git 설치
             if ! command -v git &> /dev/null; then
               sudo yum install -y git
             fi
 
-            # 프로젝트 clone (없을 경우)
+            # 프로젝트 clone
             if [ ! -d dagledagle ]; then
               git clone git@github.com:ghrltjdtprbs/dagledagle.git
             fi
@@ -49,16 +54,6 @@ jobs:
             cd dagledagle
             git fetch origin
             git checkout -B develop origin/develop
-
-
-            # 환경 변수 파일 생성
-            echo "NODE_ENV=development" > .env.dev
-            echo "DB_HOST=$DB_HOST" >> .env.dev
-            echo "DB_PORT=$DB_PORT" >> .env.dev
-            echo "DB_USERNAME=$DB_USERNAME" >> .env.dev
-            echo "DB_PASSWORD=$DB_PASSWORD" >> .env.dev
-            echo "DB_DATABASE=$DB_DATABASE" >> .env.dev
-            echo "JWT_SECRET=$JWT_SECRET" >> .env.dev
 
             # Docker 배포
             docker-compose -f docker-compose.dev.yml down || true
