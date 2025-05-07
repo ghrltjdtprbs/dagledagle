@@ -24,16 +24,31 @@ jobs:
 
       - name: Deploy to EC2 via SSH
         env:
-          DEV_DB_HOST: ${{ secrets.DEV_DB_HOST }}
-          DEV_DB_PORT: ${{ secrets.DEV_DB_PORT }}
-          DEV_DB_USERNAME: ${{ secrets.DEV_DB_USERNAME }}
-          DEV_DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
-          DEV_DB_DATABASE: ${{ secrets.DEV_DB_DATABASE }}
+          DB_HOST: ${{ secrets.DEV_DB_HOST }}
+          DB_PORT: ${{ secrets.DEV_DB_PORT }}
+          DB_USERNAME: ${{ secrets.DEV_DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
+          DB_DATABASE: ${{ secrets.DEV_DB_DATABASE }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} '
+          ssh ec2-user@${{ secrets.DEV_EC2_HOST }} bash -s <<'ENDSSH'
             set -e
 
+            # 필수 패키지 설치
+            if ! command -v git &> /dev/null; then
+              sudo yum install -y git
+            fi
+            if ! command -v docker &> /dev/null; then
+              sudo yum install -y docker
+              sudo systemctl start docker
+              sudo usermod -aG docker ec2-user
+            fi
+            if ! command -v docker-compose &> /dev/null; then
+              sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            fi
+
+            # 리포지토리 클론 또는 pull
             if [ ! -d dagledagle ]; then
               git clone https://github.com/ghrltjdtprbs/dagledagle.git
             fi
@@ -42,14 +57,18 @@ jobs:
             git checkout dev
             git pull origin dev
 
-            echo "NODE_ENV=development" > .env.dev
-            echo "DEV_DB_HOST=$DEV_DB_HOST" >> .env.dev
-            echo "DEV_DB_PORT=$DEV_DB_PORT" >> .env.dev
-            echo "DEV_DB_USERNAME=$DEV_DB_USERNAME" >> .env.dev
-            echo "DEV_DB_PASSWORD=$DEV_DB_PASSWORD" >> .env.dev
-            echo "DEV_DB_DATABASE=$DEV_DB_DATABASE" >> .env.dev
-            echo "JWT_SECRET=$JWT_SECRET" >> .env.dev
+            # .env.dev 생성
+            cat > .env.dev <<EOF
+NODE_ENV=development
+DB_HOST=$DB_HOST
+DB_PORT=$DB_PORT
+DB_USERNAME=$DB_USERNAME
+DB_PASSWORD=$DB_PASSWORD
+DB_DATABASE=$DB_DATABASE
+JWT_SECRET=$JWT_SECRET
+EOF
 
-            docker compose -f docker-compose.dev.yml down || true
-            docker compose -f docker-compose.dev.yml up -d --build
-          '
+            # 도커 실행
+            docker-compose -f docker-compose.dev.yml down || true
+            docker-compose -f docker-compose.dev.yml up -d --build
+ENDSSH
