@@ -8,6 +8,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import configuration from './config/config.default';
 import localConfig   from './config/config.local';
 import prodConfig    from './config/config.prod';
+import devConfig     from './config/config.dev';
 
 import { AuthModule }         from './domain/auth/auth.module';
 import { UserModule }         from './domain/user/user.module';
@@ -29,7 +30,11 @@ import { AppService }    from './app.service';
       ignoreEnvFile: process.env.NODE_ENV !== 'local',
       load: [
         configuration,
-        process.env.NODE_ENV === 'local' ? localConfig : prodConfig,
+        process.env.NODE_ENV === 'local'
+        ? localConfig
+        : process.env.NODE_ENV === 'dev'
+          ? devConfig
+          : prodConfig,
       ],
     }),
 
