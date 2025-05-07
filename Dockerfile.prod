@@ -1,0 +1,52 @@
+# 베이스 이미지는 가볍고 안전한 node:alpine 계열 추천
+FROM node:20-alpine
+
+# 한국 시간대 설정
+RUN apk add --no-cache tzdata \
+    && cp /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
+    && echo "Asia/Seoul" > /etc/timezone \
+    && apk del tzdata
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# package*.json 먼저 복사 → 캐시 효율
+COPY package*.json ./
+
+# 의존성 설치 (프로덕션 기준)
+RUN npm ci --omit=dev
+
+# 소스 복사 + 빌드 결과물
+COPY . .
+
+# Nest 빌드 (ts → js로 변환)
+RUN npm run build
+
+# 기본 명령어
+CMD ["node", "dist/main.js"]
+# 베이스 이미지는 가볍고 안전한 node:alpine 계열 추천
+FROM node:20-alpine
+
+# 한국 시간대 설정
+RUN apk add --no-cache tzdata \
+    && cp /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
+    && echo "Asia/Seoul" > /etc/timezone \
+    && apk del tzdata
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# package*.json 먼저 복사 → 캐시 효율
+COPY package*.json ./
+
+# 의존성 설치 (프로덕션 기준)
+RUN npm ci --omit=dev
+
+# 소스 복사 + 빌드 결과물
+COPY . .
+
+# Nest 빌드 (ts → js로 변환)
+RUN npm run build
+
+# 기본 명령어
+CMD ["node", "dist/main.js"]
