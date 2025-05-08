@@ -18,20 +18,7 @@ import { MyPostSummaryResponseDto } from '../../post/dto/response/my-post-summar
 @Controller('posts')
 export class PostQueryController {
   constructor(private readonly postQueryService: PostQueryService) {}
-
-  @Get(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({
-    summary: '게시글 상세 조회',
-    description: '게시글 상세 정보, 댓글, 좋아요 여부까지 포함해서 조회합니다.',
-  })
-  async getPostDetail(
-    @Param('id') id: string,
-    @Req() req,
-  ): Promise<PostDetailResponseDto> {
-    return this.postQueryService.getPostDetail(+id, req.user.id);
-  }
-
+  
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
@@ -62,5 +49,18 @@ export class PostQueryController {
   @ApiOkResponse({ type: [MyPostSummaryResponseDto] })
   async getMyPosts(@Req() req): Promise<MyPostSummaryResponseDto[]> {
     return this.postQueryService.getMyPosts(req.user.id);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: '게시글 상세 조회',
+    description: '게시글 상세 정보, 댓글, 좋아요 여부까지 포함해서 조회합니다.',
+  })
+  async getPostDetail(
+    @Param('id') id: string,
+    @Req() req,
+  ): Promise<PostDetailResponseDto> {
+    return this.postQueryService.getPostDetail(+id, req.user.id);
   }
 }
