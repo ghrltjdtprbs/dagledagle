@@ -1,0 +1,18 @@
+# docker-compose.dev.yml
+
+version: "3.8"
+
+services:
+  app:
+    container_name: dagledagle-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "80:80"  # 호스트포트:컨테이너포트
+    volumes:
+      - .:/app              # 코드 핫리로드
+      - /app/node_modules   # 의존성 격리
+    env_file:
+      - .env
+    command: npm run start:dev
