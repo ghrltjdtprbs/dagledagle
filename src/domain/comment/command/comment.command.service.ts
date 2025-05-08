@@ -54,7 +54,7 @@ export class CommentCommandService {
 
       if (!parent) throw new CommentNotFoundException();
 
-      if (parent) {
+      if (parent.parent) {
         throw new CommentDepthExceededException();
       }
     }
