@@ -1,6 +1,6 @@
 // src/app.module.ts
 
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -17,13 +17,13 @@ import { CommentModule }      from './domain/comment/comment.module';
 import { LikeModule }         from './domain/like/like.module';
 import { NotificationModule } from './domain/notification/notification.module';
 import { HealthModule }       from './health/health.module';
+import { LoggerMiddleware }   from './common/middleware/logger.middleware';
 
 import { AppController } from './app.controller';
 import { AppService }    from './app.service';
 
 @Module({
   imports: [
-    // 환경별 .env 파일과 설정 로드
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'local' ? '.env' : undefined,
@@ -31,16 +31,15 @@ import { AppService }    from './app.service';
       load: [
         configuration,
         process.env.NODE_ENV === 'local'
-        ? localConfig
-        : process.env.NODE_ENV === 'dev'
-          ? devConfig
-          : prodConfig,
+          ? localConfig
+          : process.env.NODE_ENV === 'dev'
+            ? devConfig
+            : prodConfig,
       ],
     }),
 
     EventEmitterModule.forRoot(),
 
-    // TypeORM 비동기 설정
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject:  [ConfigService],
@@ -56,7 +55,6 @@ import { AppService }    from './app.service';
           entities:   [__dirname + '/**/*.entity.{ts,js}'],
           synchronize:config.get<boolean>('DB_SYNCHRONIZE', false),
           logging:    config.get<boolean>('DB_LOGGING', false),
-          // 로컬에서는 SSL 비활성화, 그 외(prod 등)에서는 SSL 활성화
           ssl: isLocal
             ? false
             : { rejectUnauthorized: false },
@@ -64,7 +62,6 @@ import { AppService }    from './app.service';
       },
     }),
 
-    // 애플리케이션 도메인 모듈들
     UserModule,
     AuthModule,
     PostModule,
@@ -76,4 +73,10 @@ import { AppService }    from './app.service';
   controllers: [AppController],
   providers:   [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    if (process.env.NODE_ENV === 'dev') {
+      consumer.apply(LoggerMiddleware).forRoutes('*');
+    }
+  }
+}
