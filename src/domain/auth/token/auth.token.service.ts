@@ -20,7 +20,7 @@ export class AuthTokenService {
 
     try {
       payload = this.jwtService.verify(token, {
-        secret: process.env.JWT_REFRESH_SECRET,
+        secret: process.env.JWT_SECRET,
       });
     } catch (e) {
       throw new UnauthorizedException('RefreshToken이 유효하지 않음');
@@ -43,7 +43,7 @@ export class AuthTokenService {
     };
 
     const accessToken = this.jwtService.sign(newPayload, {
-      secret: process.env.JWT_ACCESS_SECRET,
+      secret: process.env.JWT_SECRET,
       expiresIn: '1h',
     });
 
