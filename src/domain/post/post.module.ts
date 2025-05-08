@@ -11,6 +11,8 @@ import { PostCommandService } from './command/post.command.service';
 import { PostCommandController } from './command/post.command.controller';
 import { PostQueryService } from './query/post.query.service';
 import { PostQueryController } from './query/post.query.controller';
+import { UploadController } from './file/upload.controller';
+import { UploadService } from './file/upload.service';
 
 @Module({
   imports: [
@@ -22,7 +24,7 @@ import { PostQueryController } from './query/post.query.controller';
       LikeEntity,
     ]),
   ],
-  controllers: [PostCommandController, PostQueryController],
-  providers: [PostCommandService, PostQueryService],
+  controllers: [PostCommandController, PostQueryController, UploadController],
+  providers: [PostCommandService, PostQueryService, UploadService],
 })
 export class PostModule {}

@@ -9,9 +9,9 @@
     "target": "es2022",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./src",                   // ✅ 경로 기준을 src로 고정
+    "baseUrl": "./src",                  
     "paths": {
-      "@/*": ["*"]                        // ✅ @ → src/ 로 매핑됨
+      "@/*": ["*"]                       
     },
     "incremental": true,
     "skipLibCheck": true,
