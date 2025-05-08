@@ -1,55 +1,49 @@
-import 'dotenv/config';
+// src/main.ts
 
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { GlobalExceptionFilter } from './common/filter/global-exception.filter';
+import 'dotenv/config';
+import { NestFactory }    from '@nestjs/core';
+import { ConfigService }  from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe, Logger } from '@nestjs/common';
-import { config } from './config';
-import { SuccessInterceptor } from './common/interceptors/success.interceptor';
+import { AppModule }      from './app.module';
+import { GlobalExceptionFilter }   from './common/filter/global-exception.filter';
+import { SuccessInterceptor }      from './common/interceptors/success.interceptor';
 
 async function bootstrap() {
-  console.log('🚀 Starting app...');
-  console.log('🧪 Loaded config.database:', config.database);
+  Logger.log('🚀 Starting app...');
 
-  let app;
-  try {
-    app = await NestFactory.create(AppModule);
-  } catch (err) {
-    console.error('❌ AppModule 생성 중 에러:', err);
-    console.error(err?.stack);
-    process.exit(1);
-  }
+  const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
 
   // 전역 유효성 검사 파이프
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }));
 
-  // 전역 성공 응답 인터셉터
+  // 전역 성공 인터셉터
   app.useGlobalInterceptors(new SuccessInterceptor());
 
   // 전역 예외 필터
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // Swagger 문서 설정
-  if (config.swagger) {
+  // Swagger 설정 (환경별 swagger 플래그 확인)
+  if (configService.get<boolean>('swagger')) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('DagleDagle API')
       .setDescription('API 명세서입니다.')
       .setVersion('1.0')
       .addBearerAuth()
       .build();
-
-    const document = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('api-docs', app, document);
+    const document = SwaggerModule.createDocument(app as any, swaggerConfig);
+    SwaggerModule.setup('api-docs', app as any, document);
+    Logger.log('📑 Swagger UI enabled at /api-docs');
   }
 
-  //  무조건 포트 80으로 서버 실행
-  await app.listen(80);
+  // 포트 설정 (필요시 env 또는 default 80)
+  const port = configService.get<number>('server.port') ?? 80;
+  await app.listen(port);
 }
+
 bootstrap();
